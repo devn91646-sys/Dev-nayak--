@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEV JEANS - Fashion Store</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Arial,sans-serif;background:#f5f5f5;color:#171717}
+header{background:#111;color:#fff;padding:16px 5%;display:flex;
+justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.logo{font-size:clamp(21px,5vw,32px);font-weight:900}
+.logo span{color:#c7ff00}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.cart{background:#c7ff00;border:0;border-radius:9px;padding:12px;font-weight:bold}
+.hero{background:#171717;color:white;padding:50px 6%}
+.hero small{color:#c7ff00;letter-spacing:2px}
+.hero h1{font-size:clamp(40px,9vw,68px);margin:18px 0;line-height:1}
+.hero p{color:#ddd;line-height:1.7}
+.shopbtn{display:inline-block;background:#c7ff00;color:#111;
+text-decoration:none;padding:14px 20px;border-radius:8px;margin-top:20px;font-weight:bold}
+main{max-width:1250px;margin:auto;padding:30px 4%}
+h2{margin-bottom:12px}
+.subtitle{color:#777;margin-bottom:20px}
+.searchbox{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+.searchbox input{flex:1;min-width:180px;padding:15px;border:1px solid #ddd;
+border-radius:9px;background:white}
+.searchbox select{padding:14px;border:1px solid #ddd;border-radius:9px;background:white}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.filters button{border:1px solid #ddd;background:white;padding:10px 15px;border-radius:30px}
+.filters button.active{background:#111;color:white}
+.products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.card{background:white;border-radius:12px;overflow:hidden}
+.card img{display:block;width:100%;height:310px;object-fit:cover;background:#e8e8e8}
+.info{padding:14px}
+.info h3{font-size:18px;margin-bottom:8px}
+.info p{font-size:13px;color:#777;margin-bottom:12px}
+.price{font-size:21px;font-weight:bold;margin-bottom:13px}
+.old{font-size:13px;color:#999;text-decoration:line-through;margin-left:6px}
+.add{width:100%;border:0;background:#111;color:white;border-radius:7px;padding:13px}
+.add:active{background:#c7ff00;color:#111}
+.empty{grid-column:1/-1;text-align:center;padding:30px;background:white}
+footer{text-align:center;background:#111;color:white;padding:28px}
+footer span{color:#c7ff00}
+.cartpanel{display:none;position:fixed;inset:0;background:#0008;z-index:10;
+align-items:center;justify-content:center;padding:15px}
+.cartpanel.show{display:flex}
+.cartbox{background:white;border-radius:12px;padding:20px;width:100%;max-width:420px;max-height:80vh;overflow:auto}
+.carttop{display:flex;justify-content:space-between;margin-bottom:20px}
+.cartitem{padding:12px 0;border-bottom:1px solid #ddd}
+.close{padding:8px 12px;border:0;border-radius:6px;background:#eee}
+@media(max-width:750px){
+ .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .card img{height:260px}
+}
+@media(max-width:420px){
+ header{padding:14px 4%}
+ .cart{padding:10px;font-size:13px}
+ main{padding:24px 3%}
+ .hero{padding:40px 5%}
+ .searchbox input,.searchbox select{width:100%}
+ .card img{height:210px}
+ .info{padding:10px}
+ .info h3{font-size:15px}
+ .price{font-size:18px}
+ .old{font-size:11px}
+ .add{font-size:13px;padding:11px 5px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">DEV <span>JEANS</span></div>
+  <button class="cart" onclick="openCart()">🛒 Cart (<span id="count">0</span>)</button>
+</header>
+
+<section class="hero">
+  <small>NEW FASHION COLLECTION</small>
+  <h1>DENIM<br>YOUR STYLE.</h1>
+  <p>Explore the latest jeans collection.</p>
+  <p>Baggy • Cargo • Blue • Black • White</p>
+  <a href="#shop" class="shopbtn">SHOP NOW ↓</a>
+</section>
+
+<main id="shop">
+  <h2>Discover Your Jeans 👖</h2>
+  <p class="subtitle">Fashion styles for every day.</p>
+
+  <div class="searchbox">
+    <input id="search" type="search" placeholder="Search Cargo Jeans, Baggy Jeans..."
+      oninput="renderProducts()">
+    <select id="category" onchange="renderProducts()">
+      <option value="All">All Jeans</option>
+      <option value="Cargo">Cargo Jeans</option>
+      <option value="Baggy">Baggy Jeans</option>
+      <option value="Blue">Blue Jeans</option>
+      <option value="Black">Black Jeans</option>
+      <option value="White">White Jeans</option>
+    </select>
+  </div>
+
+  <div class="filters">
+    <button class="active" onclick="pick('All',this)">All</button>
+    <button onclick="pick('Cargo',this)">Cargo</button>
+    <button onclick="pick('Baggy',this)">Baggy</button>
+    <button onclick="pick('Blue',this)">Blue</button>
+    <button onclick="pick('Black',this)">Black</button>
+    <button onclick="pick('White',this)">White</button>
+  </div>
+
+  <div class="products" id="products"></div>
+</main>
+
+<div class="cartpanel" id="panel" onclick="outsideClose(event)">
+  <div class="cartbox">
+    <div class="carttop">
+      <h2>Your Cart</h2>
+      <button class="close" onclick="closeCart()">✕</button>
+    </div>
+    <div id="cartitems"></div>
+    <h3 id="total" style="margin:20px 0"></h3>
+    <button class="close" onclick="clearCart()">Clear Cart</button>
+  </div>
+</div>
+
+<footer>
+  <h2>DEV <span>JEANS</span></h2>
+  <p>Find your style. Wear your confidence.</p>
+  <p style="margin-top:12px">© 2026 DEV JEANS</p>
+</footer>
+
+<script>
+const products = [
+ {name:"Blue Baggy Jeans",type:"Baggy",price:999,old:1499,
+ img:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=75"},
+ {name:"Black Cargo Jeans",type:"Cargo",price:1299,old:1799,
+ img:"https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=600&q=75"},
+ {name:"Classic Blue Jeans",type:"Blue",price:899,old:1299,
+ img:"https://images.unsplash.com/photo-1548883354-94bcfe321cbb?auto=format&fit=crop&w=600&q=75"},
+ {name:"White Denim Jeans",type:"White",price:1099,old:1599,
+ img:"https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=600&q=75"},
+ {name:"Black Baggy Jeans",type:"Baggy",price:1199,old:1699,
+ img:"https://images.unsplash.com/photo-1555689502-c4b22d76c56f?auto=format&fit=crop&w=600&q=75"},
+ {name:"Olive Cargo Jeans",type:"Cargo",price:1399,old:1899,
+ img:"https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=75"},
+ {name:"Black Denim Jeans",type:"Black",price:999,old:1399,
+ img:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=75"},
+ {name:"Blue Cargo Jeans",type:"Cargo",price:1499,old:1999,
+ img:"https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=600&q=75"},
+ {name:"White Baggy Jeans",type:"White",price:1199,old:1599,
+ img:"https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=600&q=75"}
+];
+
+let cart = [];
+
+function renderProducts(){
+ const q=document.getElementById("search").value.trim().toLowerCase();
+ const c=document.getElementById("category").value;
+ const list=products.filter(p=>{
+   const matchText=(p.name+" "+p.type+" jeans").toLowerCase().includes(q);
+   const matchCat=c==="All"||p.type===c||p.name.toLowerCase().includes(c.toLowerCase());
+   return matchText&&matchCat;
+ });
+
+ document.getElementById("products").innerHTML=list.length?list.map((p)=>`
+ <article class="card">
+  <img src="${p.img}" alt="${p.name}" loading="lazy"
+   onerror="this.onerror=null;this.src='https://placehold.co/500x600/eeeeee/222222?text=DEV+JEANS'">
+  <div class="info">
+   <h3>${p.name}</h3>
+   <p>Women's & Men's Denim Collection</p>
+   <div class="price">₹${p.price}<span class="old">₹${p.old}</span></div>
+   <button class="add" onclick="addCart('${p.name}')">＋ Add to Cart</button>
+  </div>
+ </article>`).join(""):'<div class="empty">No jeans found. Try another search.</div>';
+}
+
+function pick(value,button){
+ document.getElementById("category").value=value;
+ document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
+ button.classList.add("active");
+ renderProducts();
+}
+function addCart(name){
+ const item=products.find(p=>p.name===name);
+ if(item)cart.push(item);
+ document.getElementById("count").textContent=cart.length;
+}
+function openCart(){
+ document.getElementById("panel").classList.add("show");
+ updateCart();
+}
+function closeCart(){document.getElementById("panel").classList.remove("show")}
+function outsideClose(e){if(e.target.id==="panel")closeCart()}
+function updateCart(){
+ document.getElementById("cartitems").innerHTML=cart.length?
+ cart.map((p,i)=>`<div class="cartitem"><b>${p.name}</b><br>₹${p.price}
+ <button class="close" onclick="removeItem(${i})">Remove</button></div>`).join("")
+ :"<p>Your cart is empty.</p>";
+ document.getElementById("total").textContent="Total: ₹"+cart.reduce((s,p)=>s+p.price,0);
+ document.getElementById("count").textContent=cart.length;
+}
+function removeItem(i){cart.splice(i,1);updateCart()}
+function clearCart(){cart=[];updateCart()}
+
+renderProducts();
+</script>
+</body>
+</html>
